@@ -5,7 +5,7 @@ struct process {
     int status;
 }p[10];
 int limit;
- 
+
 //function to sort processes by arrival time
 void Arrival_Time_Sorting() {
     struct process temp;
@@ -22,8 +22,9 @@ void Arrival_Time_Sorting() {
 }
  
 void main() {
-	int i, time = 0, burst_time = 0, largest;
-	char c;
+	int i, time = 0, burst_time = 0, largest, bt[10], count=0, cs=0, temp=0, limit, flag=0, total=0, rt[20], k, x;
+	char queue1[50], queue[50];
+	char c, f;
 	float wait_time = 0, turnaround_time = 0; 
 	float average_waiting_time, average_turnaround_time;
 	printf("\nEnter Total Number of Processes : ");
@@ -37,34 +38,57 @@ void main() {
         scanf("%d", &p[i].arrival_time );
         printf("Enter Burst Time : ");
         scanf("%d", &p[i].burst_time);
+        bt[i] = p[i].burst_time;
         printf("Enter Priority : ");
         scanf("%d", &p[i].priority);
         p[i].status = 0;
-        burst_time = burst_time + p[i].burst_time;
+        burst_time = burst_time + p[i].burst_time; //Calculating total burst time
     }
       
     Arrival_Time_Sorting(); //sorting by arrival time
     p[9].priority = -9999;
-    printf("\nProcess Name\tArrival Time\tBurst Time\tPriority\tWaiting Time");
-    for(time = p[0].arrival_time; time < burst_time;) {
+    for(time = p[0].arrival_time; time < burst_time + cs;) {
         largest = 9;
         for(i = 0; i < limit; i++) {
-            if(p[i].arrival_time <= time && p[i].status != 1 && p[i].priority > p[largest].priority)
+            if(p[i].arrival_time <= time && p[i].status!=1 && p[i].priority > p[largest].priority) {
                 largest = i;
+			}
         }
-        time = time + p[largest].burst_time;
-        p[largest].ct = time;
-        p[largest].waiting_time = p[largest].ct - p[largest].arrival_time - p[largest].burst_time;
-        p[largest].turnaround_time = p[largest].ct - p[largest].arrival_time;
-        p[largest].status = 1;
-        wait_time = wait_time + p[largest].waiting_time;
-        turnaround_time = turnaround_time + p[largest].turnaround_time;
-        printf("\n%c\t\t%d\t\t%d\t\t%d\t\t%d", p[largest].process_name,
-        p[largest].arrival_time, p[largest].burst_time,
-        p[largest].priority, p[largest].waiting_time);
+        time += 1;
+		bt[largest] -= 1;
+		count++;
+        if(bt[largest	] == 0)
+        	p[largest].status = 1;
+        queue1[temp] = p[largest].process_name;
+        temp++;
     }
-    average_waiting_time = wait_time / limit;  //cal avg waiting time
-    average_turnaround_time = turnaround_time / limit;
-    printf("\n\nAverage waiting time:%f\n", average_waiting_time);
-    printf("Average Turnaround Time:%f\n", average_turnaround_time);
+    
+    //Appying preemption on the given processes and adding 2 sec latency
+    for(k=0;k<21;k++) {
+    	if(flag==0){
+			queue[0] = queue1[k];
+			flag = 1;
+			total = 1;
+			rt[0] = total;
+		}
+		else {
+			queue[flag] = queue1[k];
+			if(queue[flag] == queue[flag-1]){
+				total++;
+				rt[flag-1]=total;
+			}
+			else {
+				total+=2;
+				total++;
+				rt[flag] = total;
+				flag++;
+			}
+		}	
+	}
+	printf("\n");
+	for(x=0;x<9;x++)
+		printf("%c\t", queue[x]);
+	printf("\n");
+	for(x=0;x<9;x++)
+		printf("%d\t", rt[x]);
 }
